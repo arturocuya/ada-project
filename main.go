@@ -39,11 +39,7 @@ func newImgPath(originalPath string, suffix string) string {
   return newPath
 }
 
-func toBlackAndWhite(originalImg image.Image) image.Image {
-  size := originalImg.Bounds().Size()
-  rect := image.Rect(0, 0, size.X, size.Y)
-  newImg := image.NewRGBA(rect)
-
+func toBlackAndWhite(originalImg image.Image, newImg *image.RGBA, size image.Point) {
   for x := 0; x < size.X; x++ {
     for y := 0; y < size.Y; y++ {
       pixel := originalImg.At(x,y)
@@ -61,16 +57,18 @@ func toBlackAndWhite(originalImg image.Image) image.Image {
       newImg.Set(x, y, newColor)
     }
   }
-
-  return newImg
 }
 
 func main() {
   // The image path must be passed as an argument
   if len(os.Args) < 2 { log.Fatalln("Image path is required") }
   imgPath := os.Args[1]
-
   img := decodeJpeg(imgPath)
-  newImg := toBlackAndWhite(img)
+
+  size := img.Bounds().Size()
+  rect := image.Rect(0, 0, size.X, size.Y)
+  newImg := image.NewRGBA(rect)
+
+  toBlackAndWhite(img, newImg, size)
   encodeJpeg(newImg, newImgPath(imgPath, "gray"))
 }

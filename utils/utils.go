@@ -60,3 +60,28 @@ func ToBlackAndWhite(originalImg image.Image, newImg *image.RGBA, size image.Poi
   }
 }
 
+func ToYCbCr(originalImg image.Image, newImg *image.RGBA){
+	size := originalImg.Bounds().Size()
+
+	for x := 0; x < size.X; x++{
+		for y := 0; y < size.Y; y++{
+			pixel := originalImg.At(x,y)
+			originalColor := color.RGBAModel.Convert(pixel).(color.RGBA)
+
+			r := float64(originalColor.R)
+      g := float64(originalColor.G)
+      b := float64(originalColor.B)
+
+      componentY :=  uint8(r*0.299 	+ g*0.587  + b*0.114)
+      componentCb := uint8(r*-0.169 + g*-0.331 + b*0.5)
+      componentCr := uint8(r*0.5 		+ g*-0.81  + b*-0.81)
+
+      newColor := color.RGBA {
+        R: componentY, G: componentCb, B: componentCr, A: originalColor.A,
+      }
+
+      newImg.Set(x, y, newColor)
+		}
+	}
+}
+

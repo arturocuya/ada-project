@@ -17,4 +17,7 @@ func main() {
 
   ut.ToBlackAndWhite(img, newImg, size)
   ut.EncodeJpeg(newImg, ut.NewImgPath(imgPath, "gray"))
+
+  ut.ToYCbCr(img, newImg)
+  ut.EncodeJpeg(newImg, ut.NewImgPath(imgPath, "ycbcr"))
 }

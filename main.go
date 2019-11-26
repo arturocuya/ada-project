@@ -18,7 +18,7 @@ func main() {
 
   var channelsImg [3]*image.RGBA
   for i:=0; i<3; i++ {
-  	channelsImg[i] = image.NewRGBA(rect)
+    channelsImg[i] = image.NewRGBA(rect)
   }
 
   // Convert to YCbCr
@@ -28,6 +28,6 @@ func main() {
   // Split YCbCr channels
   ut.GetChannelsYCbCr(imgYcbcr, channelsImg)
   for i:=0; i<3; i++ {
-  	ut.EncodeJpeg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("ycbcr-%d", i+1)))
+    ut.EncodeJpeg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("ycbcr-%d", i+1)))
   }
 }

@@ -73,8 +73,8 @@ func ToYCbCr(originalImg image.Image, newImg *image.RGBA){
       b := float64(originalColor.B)
 
       componentY :=  uint8(r*0.299 	+ g*0.587  + b*0.114)
-      componentCb := uint8(r*-0.169 + g*-0.331 + b*0.5)
-      componentCr := uint8(r*0.5 		+ g*-0.81  + b*-0.81)
+      componentCb := uint8(r*-0.169 + g*-0.331 + b*0.5 + 128)
+      componentCr := uint8(r*0.5 		+ g*-0.419  + b*-0.081 + 128)
 
       newColor := color.RGBA {
         R: componentY, G: componentCb, B: componentCr, A: originalColor.A,
@@ -84,4 +84,35 @@ func ToYCbCr(originalImg image.Image, newImg *image.RGBA){
 		}
 	}
 }
+
+func GetChannelsYCbCr(originalImg image.Image, dividedImgs [3]*image.RGBA){
+	size := originalImg.Bounds().Size()
+
+	for x := 0; x < size.X; x++{
+		for y := 0; y < size.Y; y++{
+			pixel := originalImg.At(x,y)
+			originalColor := color.RGBAModel.Convert(pixel).(color.RGBA)
+
+			componentY := uint8(float64(originalColor.R))
+      componentCb := uint8(float64(originalColor.G))
+      componentCr := uint8(float64(originalColor.B))
+
+      // Y channel
+      dividedImgs[0].Set(x,y, color.RGBA {
+        R: componentY, G: componentY, B: componentY, A: originalColor.A,
+      })
+
+      // Cb channel
+      dividedImgs[1].Set(x,y, color.RGBA {
+        R: componentCb, G: componentCb, B: componentCb, A: originalColor.A,
+      })
+
+      // Cr channel
+      dividedImgs[2].Set(x,y, color.RGBA {
+        R: componentCr, G: componentCr, B: componentCr, A: originalColor.A,
+      })
+		}
+	}
+}
+
 

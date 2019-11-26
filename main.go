@@ -1,7 +1,7 @@
 package main
 
 import (
-    "os"; "image"; "log"
+    "os"; "image"; "log"; "fmt";
     ut "./utils"
 )
 
@@ -11,13 +11,23 @@ func main() {
   imgPath := os.Args[1]
   img := ut.DecodeJpeg(imgPath)
 
+  // Create empty images
   size := img.Bounds().Size()
   rect := image.Rect(0, 0, size.X, size.Y)
-  newImg := image.NewRGBA(rect)
+  imgYcbcr := image.NewRGBA(rect)
 
-  ut.ToBlackAndWhite(img, newImg, size)
-  ut.EncodeJpeg(newImg, ut.NewImgPath(imgPath, "gray"))
+  var channelsImg [3]*image.RGBA
+  for i:=0; i<3; i++ {
+  	channelsImg[i] = image.NewRGBA(rect)
+  }
 
-  ut.ToYCbCr(img, newImg)
-  ut.EncodeJpeg(newImg, ut.NewImgPath(imgPath, "ycbcr"))
+  // Convert to YCbCr
+  ut.ToYCbCr(img, imgYcbcr)
+  ut.EncodeJpeg(imgYcbcr, ut.NewImgPath(imgPath, "ycbcr"))
+
+  // Split YCbCr channels
+  ut.GetChannelsYCbCr(imgYcbcr, channelsImg)
+  for i:=0; i<3; i++ {
+  	ut.EncodeJpeg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("ycbcr-%d", i+1)))
+  }
 }

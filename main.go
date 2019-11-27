@@ -1,7 +1,7 @@
 package main
 
 import (
-    "os"; "image"; "log"; "fmt";
+    "os"; "image"; "log";
     ut "./utils"
 )
 
@@ -21,13 +21,22 @@ func main() {
     channelsImg[i] = image.NewRGBA(rect)
   }
 
+  imgSubsample := image.NewRGBA(rect)
+
   // Convert to YCbCr
   ut.ToYCbCr(img, imgYcbcr)
   ut.EncodeJpeg(imgYcbcr, ut.NewImgPath(imgPath, "ycbcr"))
 
   // Split YCbCr channels
+  /*
   ut.GetChannelsYCbCr(imgYcbcr, channelsImg)
   for i:=0; i<3; i++ {
     ut.EncodeJpeg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("ycbcr-%d", i+1)))
   }
+  */
+
+  // Chroma Subsample
+  ut.ChromaSubsampling(imgYcbcr, imgSubsample)
+  ut.EncodeJpeg(imgSubsample, ut.NewImgPath(imgPath, "subsample"))
+  // ut.GetColorAt(img, 0,0)
 }

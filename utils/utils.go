@@ -2,7 +2,7 @@ package utils
 
 import (
     "os"; "image"; "image/jpeg"; "image/color"
-    "path/filepath"; "fmt"; "log"; "strings"
+    "path/filepath"; "fmt"; "log"; "strings"; "../consts"
 )
 
 func Check(err error) {
@@ -93,9 +93,9 @@ func GetChannelsYCbCr(originalImg image.Image, dividedImgs [3]*image.RGBA){
       pixel := originalImg.At(x,y)
       originalColor := color.RGBAModel.Convert(pixel).(color.RGBA)
 
-      componentY := uint8(float64(originalColor.R))
-      componentCb := uint8(float64(originalColor.G))
-      componentCr := uint8(float64(originalColor.B))
+      componentY := originalColor.R
+      componentCb := originalColor.G
+      componentCr := originalColor.B
 
       // Y channel
       dividedImgs[0].Set(x,y, color.RGBA {
@@ -115,4 +115,47 @@ func GetChannelsYCbCr(originalImg image.Image, dividedImgs [3]*image.RGBA){
   }
 }
 
+func ChromaSubsampling(originalImg image.Image, newImg *image.RGBA){
+  size := originalImg.Bounds().Size()
+  oldImgColor := getColor(originalImg)
+  const mcuWidth = 16 // MCU width
+  const mcuHeight = 8 // MCU height
+
+  // Iterate through each MCU in image 
+ for y_mcu:=0; y_mcu<size.Y; y_mcu+=mcuHeight{
+   for x_mcu:=0; x_mcu<size.X; x_mcu+=mcuWidth{
+     // fmt.Printf("----x:%d y:%d\n", x_mcu, y_mcu)
+     // Iterate through MCU in image
+     for y:=y_mcu; y<y_mcu+mcuHeight; y++{
+       for x:=x_mcu; x<x_mcu+mcuWidth; x++{
+         // fmt.Printf("x:%d y:%d\n", x, y)
+         pixel := oldImgColor(x, y)
+
+         if (x<x_mcu+mcuWidth/2){
+           pixel[consts.Cb] = (oldImgColor(x, y)[consts.Cb] + oldImgColor(x*2+1, y)[consts.Cb])/2
+           pixel[consts.Cr] = (oldImgColor(x, y)[consts.Cr] + oldImgColor(x*2+1, y)[consts.Cr])/2
+         }
+
+         newImg.Set(x,y, color.RGBA {
+           R: uint8(pixel[consts.Y]), G: uint8(pixel[consts.Cb]), B: uint8(pixel[consts.Cr]), A: uint8(pixel[3]),
+         })
+       }
+     }
+   }
+  } 
+}
+
+
+
+func getColor(img image.Image) func(x, y int) [4]float64{
+  return func(x, y int) [4]float64{
+    pixel := img.At(x,y)
+    intCol := color.RGBAModel.Convert(pixel).(color.RGBA)
+    var floatColor [4]float64
+    for i, intRGB := range [4]uint8{intCol.R, intCol.G, intCol.B, intCol.A}{
+      floatColor[i] = float64(intRGB)
+    }
+    return floatColor
+  }
+}
 

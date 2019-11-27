@@ -1,3 +1,8 @@
+# Files without extension
+*
+!/**/
+!*.*
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -15,13 +20,8 @@
 *.swp
 
 # MacOS files
-.DS_Store
-
-# Files without extension
-*
-!/**/
-!*.*
+*.DS_Store
 
 # Image files. jpeg allowed, jpg no
-img/output
+img/*-output
 *.jpg

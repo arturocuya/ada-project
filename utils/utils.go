@@ -116,6 +116,9 @@ func GetChannelsYCbCr(originalImg image.Image, dividedImgs [3]*image.RGBA){
 }
 
 func ChromaSubsampling(originalImg image.Image, newImg *image.RGBA){
+  /* This implementation corresponds to 4:2:2. It is only taking the average of
+     TWO horizontal consecutive pixels
+  */
   size := originalImg.Bounds().Size()
   oldImgColor := getColor(originalImg)
   const mcuWidth = 16 // MCU width
@@ -124,16 +127,28 @@ func ChromaSubsampling(originalImg image.Image, newImg *image.RGBA){
   // Iterate through each MCU in image 
  for y_mcu:=0; y_mcu<size.Y; y_mcu+=mcuHeight{
    for x_mcu:=0; x_mcu<size.X; x_mcu+=mcuWidth{
-     // fmt.Printf("----x:%d y:%d\n", x_mcu, y_mcu)
      // Iterate through MCU in image
      for y:=y_mcu; y<y_mcu+mcuHeight; y++{
        for x:=x_mcu; x<x_mcu+mcuWidth; x++{
-         // fmt.Printf("x:%d y:%d\n", x, y)
-         pixel := oldImgColor(x, y)
+         /* Replace the chromance of two consecutive horizontal pixels 
+            for its average.
 
-         if (x<x_mcu+mcuWidth/2){
-           pixel[consts.Cb] = (oldImgColor(x, y)[consts.Cb] + oldImgColor(x*2+1, y)[consts.Cb])/2
-           pixel[consts.Cr] = (oldImgColor(x, y)[consts.Cr] + oldImgColor(x*2+1, y)[consts.Cr])/2
+            In other words...
+            Pixel A and pixel B are two consecutive horizontal pixels. Replace its
+            chromance (Cb and Cr) for AVERAGE(A.cb, B.cb) and AVERAGE(A.cr, B.cr).
+
+            The local index (index inside its MCU) of A is going to be even (0, 2, 3... )
+            The local index (index inside its MCU) of B is going to be odd (1, 3, 5... )
+         */
+         var pixel [4]float64
+         if x-x_mcu%2==0{
+           // Get chromance average and put it in A
+           pixel = oldImgColor(x, y)
+           pixel[consts.Cb] = (oldImgColor(x*2, y)[consts.Cb] + oldImgColor(x*2+1, y)[consts.Cb])/2
+           pixel[consts.Cr] = (oldImgColor(x*2, y)[consts.Cr] + oldImgColor(x*2+1, y)[consts.Cr])/2
+         } else{
+           // B just copies the chromance of the previous horizontal pixel (A)
+           pixel = oldImgColor(x-1, y)
          }
 
          newImg.Set(x,y, color.RGBA {

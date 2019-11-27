@@ -1,8 +1,8 @@
 package main
 
 import (
-    "os"; "image"; "log"; "fmt";
-    ut "./utils"
+    "os"; "image"; "log"; "fmt"; "reflect"
+    ut "./utils"; dct "./dct"
 )
 
 func main() {
@@ -11,8 +11,13 @@ func main() {
   imgPath := os.Args[1]
   img := ut.DecodeJpeg(imgPath)
 
+  size := img.Bounds().Size()
+  dct.DCT(img, size)
+
+  /*
   // Create empty images
   size := img.Bounds().Size()
+  fmt.Println(reflect.TypeOf(size))
   rect := image.Rect(0, 0, size.X, size.Y)
   imgYcbcr := image.NewRGBA(rect)
 
@@ -30,4 +35,9 @@ func main() {
   for i:=0; i<3; i++ {
     ut.EncodeJpeg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("ycbcr-%d", i+1)))
   }
+
+  for i:=0; i<3; i++ {
+    ut.EncodeJpeg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("dct-%d", i+1)))
+  }
+ */
 }

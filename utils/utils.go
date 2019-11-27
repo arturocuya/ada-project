@@ -1,8 +1,9 @@
 package utils
 
 import (
-    "os"; "image"; "image/jpeg"; "image/color"
-    "path/filepath"; "fmt"; "log"; "strings"
+  "os"; "image"; "image/jpeg"; "image/color"
+  "path/filepath"; "fmt"; "log"; "strings"
+  "math"
 )
 
 func Check(err error) {
@@ -110,9 +111,66 @@ func GetChannelsYCbCr(originalImg image.Image, dividedImgs [3]*image.RGBA){
       // Cr channel
       dividedImgs[2].Set(x,y, color.RGBA {
         R: componentCr, G: componentCr, B: componentCr, A: originalColor.A,
-      })      
+      })
     }
   }
 }
 
+func initCosineFormula(index int, size int) float64 {
+  var r float64
+  if index == 0 {
+    r = 1 / math.Sqrt(float64(size))
+  } else {
+    r = math.Sqrt(2) / math.Sqrt(float64(size))
+  }
+
+  return r
+}
+
+func cosineFormula(i int, j int, size image.Point, value float64) uint8 {
+  var ci, cj, dctl, sum float64
+
+  ci = initCosineFormula(i, size.X)
+  cj = initCosineFormula(j, size.Y)
+
+  sum = 0
+
+  for k := 0; k < size.X; k++{
+    for l := 0; l < size.Y; l++{
+      dctl = value /**
+             math.Cos((2 * float64(k) + 1) * float64(i) * math.Pi / float64(2 * size.X)) *
+             math.Cos((2 * float64(l) + 1) * float64(j) * math.Pi / float64(2 * size.Y))*/
+      sum += dctl
+
+    }
+  }
+
+  return (uint8) (ci * cj * sum)
+}
+
+func DiscreteCosineTransform(dividedImgs [3]*image.RGBA, size image.Point){
+  for i := 0; i < 3; i++{
+    fmt.Println("Aplying dct to ", i)
+    for x := 0; x < size.X; x++{
+      for y := 0; y < size.Y; y++{
+        fmt.Println("Working on pixel",x,y)
+        pixel := dividedImgs[i].At(x,y)
+        originalColor := color.RGBAModel.Convert(pixel).(color.RGBA)
+
+        r := cosineFormula(x, y, size, float64(originalColor.R))
+        g := cosineFormula(x, y, size, float64(originalColor.G))
+        b := cosineFormula(x, y, size, float64(originalColor.B))
+        /*r := uint8(float64(originalColor.R))
+        g := uint8(float64(originalColor.G))
+        b := uint8(float64(originalColor.B))*/
+
+        newColor := color.RGBA {
+          R: r, G: g, B: b, A: originalColor.A,
+        }
+
+        dividedImgs[i].Set(x, y, newColor)
+      }
+    }
+  }
+}
 

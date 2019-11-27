@@ -1,8 +1,14 @@
 package main
 
 import (
-    "os"; "image"; "log";
+    "os"
+    "image"
+    "image/color"
+    "log"
+    "fmt"
+    //"reflect"
     ut "./utils"
+    dct "./dct"
 )
 
 func main() {
@@ -13,7 +19,7 @@ func main() {
 
   // Create empty images
   size := img.Bounds().Size()
-  rect := image.Rect(0, 0, size.X, size.Y)
+  rect := image.Rect(0, 0, ut.Resize(size.X), ut.Resize(size.Y))
   imgYcbcr := image.NewRGBA(rect)
 
   var channelsImg [3]*image.RGBA
@@ -25,18 +31,22 @@ func main() {
 
   // Convert to YCbCr
   ut.ToYCbCr(img, imgYcbcr)
-  ut.EncodeJpeg(imgYcbcr, ut.NewImgPath(imgPath, "ycbcr"))
+  //ut.EncodeJpeg(imgYcbcr, ut.NewImgPath(imgPath, "ycbcr"))
+
+  // Chroma Subsample
+  ut.ChromaSubsampling(imgYcbcr, imgSubsample)
+  // ut.EncodeJpeg(imgSubsample, ut.NewImgPath(imgPath, "subsample"))
 
   // Split YCbCr channels
-  /*
   ut.GetChannelsYCbCr(imgYcbcr, channelsImg)
+
+  /* Save channels in file
   for i:=0; i<3; i++ {
     ut.EncodeJpeg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("ycbcr-%d", i+1)))
   }
   */
 
-  // Chroma Subsample
-  ut.ChromaSubsampling(imgYcbcr, imgSubsample)
-  ut.EncodeJpeg(imgSubsample, ut.NewImgPath(imgPath, "subsample"))
-  // ut.GetColorAt(img, 0,0)
+  dct.DCT(channelsImg[0], channelsImg[0].Bounds().Size())
+  ut.EncodeJpeg(channelsImg[0], ut.NewImgPath(imgPath, fmt.Sprintf("dct-%d", 0)))
+
 }

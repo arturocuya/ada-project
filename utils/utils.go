@@ -19,6 +19,13 @@ func NewImgPath(originalPath string, suffix string) string {
   return newPath
 }
 
+func Resize(size int) int {
+  if (size % 8 != 0) {
+    return int(math.Ceil(float64(size) / 8.0) * 8.0)
+  }
+  return size
+}
+
 
 func DecodeJpeg(path string) image.Image {
   f, err := os.Open(path)

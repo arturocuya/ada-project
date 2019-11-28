@@ -11,6 +11,15 @@ const (
 const blockSize = 64 // A DCT block is 8x8.
 type Block [blockSize]int32
 
+type RLETuple struct{
+  // Zeros before the value
+  Zb int
+  Size uint8
+  Val int32
+}
+
+type RLEList []RLETuple
+
 // Psychovisually-tuned quantization table
 // Extracted from https://es.coursera.org/lecture/dsp/7-6-the-jpeg-compression-algorithm-Q6hgv @ 2:45
 

@@ -1,21 +1,19 @@
 package main
 
 import (
-    //"os"
-    //"image"
-    //"image/color"
-    //"log"
+    "os"
+    "image"
+    "log"
     "fmt"
-    //"reflect"
-    //ut "./utils"
-    //dct "./dct"
-    //cspace "./colorspace"
-    rle "./rle"
-    consts "./consts"
+    ut "./src/utils"
+    cmp "./src/compress"
+    cspace "./src/colorspace"
+    rle "./src/compress/rle"
+    consts "./src/consts"
 )
 
 func main() {
-  var b = consts.Block {100,-60,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,00,0,0,0,0,0,0,0}
+  var b = consts.Block {100,-60,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 
   r := rle.RLE(&b)
 
@@ -24,7 +22,6 @@ func main() {
   }
   fmt.Printf("\n")
 
-  /*
   // The image path must be passed as an argument
   if len(os.Args) < 2 { log.Fatalln("Image path is required") }
   imgPath := os.Args[1]
@@ -53,7 +50,6 @@ func main() {
   // Split YCbCr channels
   cspace.GetChannelsYCbCr(imgYcbcr, channelsImg)
 
-  dct.Compress(channelsImg[0], channelsImg[0].Bounds().Size())
+  cmp.Compress(channelsImg[0], channelsImg[0].Bounds().Size())
   ut.EncodeJpeg(channelsImg[0], ut.NewImgPath(imgPath, fmt.Sprintf("dct-%d", 0)))
-  */
 }

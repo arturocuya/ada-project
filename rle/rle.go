@@ -5,6 +5,7 @@ import (
   //"image/color"
   //"fmt"
   consts "../consts"
+  ut "../utils"
 )
 
 type RLETuple struct{
@@ -46,7 +47,7 @@ func RLE(b *consts.Block) RLEList {
       if bValue == 0 {
         zeroCount++
       } else {
-        var newTuple RLETuple = RLETuple{zeroCount, bValue}
+        var newTuple RLETuple = RLETuple{zeroCount, ut.BitSize(bValue), bValue}
         rle = append(rle, newTuple)
         zeroCount = 0
       }
@@ -54,7 +55,7 @@ func RLE(b *consts.Block) RLEList {
   }
 
   if zeroCount != 0{
-    var lastTuple RLETuple = RLETuple{0, 0}
+    var lastTuple RLETuple = RLETuple{0, 0, 0}
     rle = append(rle, lastTuple)
   }
 

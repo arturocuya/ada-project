@@ -85,3 +85,20 @@ func PrintBlock(b *consts.Block) {
     fmt.Printf("\n")
   }
 }
+
+func BitSize(val int32) uint8 {
+  var b int32 = 1
+  var count uint8 = 0
+  val = int32(math.Abs(float64(val)))
+
+  if val == 1 {
+    return 1
+  }
+
+  for b < val {
+    b = b << 1
+    count++
+  }
+
+  return count
+}

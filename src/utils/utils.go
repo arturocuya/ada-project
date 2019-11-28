@@ -80,10 +80,11 @@ func ToBlackAndWhite(originalImg image.Image, newImg *image.RGBA, size image.Poi
 func PrintBlock(b *consts.Block) {
   for i := 0; i < 8; i++ {
     for j := 0; j < 8; j++ {
-      fmt.Printf("%d\t", b[i + 8 * j])
+      fmt.Printf("%d\t", b[8*i + j])
     }
     fmt.Printf("\n")
   }
+  fmt.Printf("\n")
 }
 
 func BitSize(val int32) uint8 {
@@ -101,4 +102,11 @@ func BitSize(val int32) uint8 {
   }
 
   return count
+}
+
+func PrintRLE(rle consts.RLEList) {
+  for i := 0; i < len(rle); i++ {
+    fmt.Printf("[%d,%d,%d] ", rle[i].Zb, rle[i].Size, rle[i].Val)
+  }
+  fmt.Printf("\n")
 }

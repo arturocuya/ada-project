@@ -1,4 +1,4 @@
-package main
+package main2
 
 import (
     "os"
@@ -8,20 +8,11 @@ import (
     ut "./src/utils"
     cmp "./src/compress"
     cspace "./src/colorspace"
-    rle "./src/compress/rle"
-    consts "./src/consts"
+    //rle "./src/compress/rle"
+    //consts "./src/consts"
 )
 
 func main() {
-  var b = consts.Block {100,-60,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-
-  r := rle.RLE(&b)
-
-  for i := 0; i < len(r); i++{
-    fmt.Printf("[%d,%d,%d] ", r[i].Zb, r[i].Size, r[i].Val)
-  }
-  fmt.Printf("\n")
-
   // The image path must be passed as an argument
   if len(os.Args) < 2 { log.Fatalln("Image path is required") }
   imgPath := os.Args[1]
@@ -50,6 +41,7 @@ func main() {
   // Split YCbCr channels
   cspace.GetChannelsYCbCr(imgYcbcr, channelsImg)
 
-  cmp.Compress(channelsImg[0], channelsImg[0].Bounds().Size())
+  compressed := cmp.Compress(channelsImg[0], channelsImg[0].Bounds().Size())
+  cmp.Decompress(compressed)
   ut.EncodeJpeg(channelsImg[0], ut.NewImgPath(imgPath, fmt.Sprintf("dct-%d", 0)))
 }

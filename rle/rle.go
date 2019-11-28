@@ -1,40 +1,61 @@
 package rle
 
 import (
-  "image"
-  "image/color"
-  "math"
+  //"image"
+  //"image/color"
   //"fmt"
   consts "../consts"
 )
 
-// TODO: Structure this so it holds blocks
 type RLETuple struct{
-  val uint8
-  rep uint32
+  // Zeros before the value
+  Zb int
+  Size uint8
+  Val int32
 }
 
-type RLEStruct []RLETuple
+type RLEList []RLETuple
 
-func RLE(b *consts.Block) RLEStruct {
-  rle := make(RLEStruct, 0)
-  var prev uint8 = 255
+func RLE(b *consts.Block) RLEList {
+  rle := make(RLEList, 0)
 
-  for line := 1; line <= 15; line++ {
-    startCol := math.Max(0.0, float64(line - 8))
-    count := math.Min(float64(line), math.Min((8.0 - startCol), 8.0))
+  var zeroCount = 0
 
-    for i := 0; i < int(count); i++ {
-      pixel := b[(int(math.Min(8.0, float64(line))) - i - 1 + 8 * int(startCol) + i)]
-
-      if prev != pixel {
-        var newTuple RLETuple = RLETuple{pixel, 1}
-        rle = append(rle, newTuple)
-        prev = pixel
+  // Zig zag iteration
+  for d := 1; d < 16; d++ {
+    x := d - 8
+    if x < 0 {
+      x = 0
+    }
+    y := d - 1
+    if y > 7 {
+      y = 7
+    }
+    j := 16 - d
+    if j > d {
+      j = d
+    }
+    for k := 0; k < j; k++ {
+      var bValue int32
+      if d&1 == 0 {
+        bValue = b[(x+k)*8+y-k]
       } else {
-        rle[len(rle) - 1].rep += 1
+        bValue = b[(y-k)*8+x+k]
+      }
+
+      if bValue == 0 {
+        zeroCount++
+      } else {
+        var newTuple RLETuple = RLETuple{zeroCount, bValue}
+        rle = append(rle, newTuple)
+        zeroCount = 0
       }
     }
+  }
+
+  if zeroCount != 0{
+    var lastTuple RLETuple = RLETuple{0, 0}
+    rle = append(rle, lastTuple)
   }
 
   return rle

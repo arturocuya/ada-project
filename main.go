@@ -1,19 +1,30 @@
 package main
 
 import (
-    "os"
-    "image"
+    //"os"
+    //"image"
     //"image/color"
-    "log"
+    //"log"
     "fmt"
     //"reflect"
-    ut "./utils"
-    dct "./dct"
-    cspace "./colorspace"
+    //ut "./utils"
+    //dct "./dct"
+    //cspace "./colorspace"
     rle "./rle"
+    consts "./consts"
 )
 
 func main() {
+  var b = consts.Block {int32(100),int32(-60),0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,int32(13),int32(-1),0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,00,0,0,0,0,0,0,0}
+
+  r := rle.RLE(&b)
+
+  for i := 0; i < len(r); i++{
+    fmt.Printf("[%d,%d] ", r[i].Zb, r[i].Val)
+  }
+  fmt.Printf("\n")
+
+  /*
   // The image path must be passed as an argument
   if len(os.Args) < 2 { log.Fatalln("Image path is required") }
   imgPath := os.Args[1]
@@ -42,21 +53,7 @@ func main() {
   // Split YCbCr channels
   cspace.GetChannelsYCbCr(imgYcbcr, channelsImg)
 
-  // Save channels in file
-  /*for i:=0; i<3; i++ {
-    ut.EncodeJpeg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("ycbcr-%d", i+1)))
-  }*/
-
-  dct.DCT(channelsImg[0], channelsImg[0].Bounds().Size())
+  dct.Compress(channelsImg[0], channelsImg[0].Bounds().Size())
   ut.EncodeJpeg(channelsImg[0], ut.NewImgPath(imgPath, fmt.Sprintf("dct-%d", 0)))
-
-  /*for x := 0; x < channelsImg[0].Bounds().Size().X; x++ {
-    for y := 0; y < channelsImg[0].Bounds().Size().Y; y++ {
-      fmt.Printf("%d\t", channelsImg[0].At(x,y).(color.RGBA).R)
-    }
-    fmt.Printf("\n")
-  }*/
-
-  rlenc := rle.RLE(channelsImg[0], channelsImg[0].Bounds().Size())
-
+  */
 }

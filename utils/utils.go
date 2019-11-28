@@ -1,8 +1,15 @@
 package utils
 
 import (
-    "os"; "image"; "image/jpeg"; "image/color"
-    "path/filepath"; "fmt"; "strings"; "math"
+    "os"
+    "image"
+    "image/jpeg"
+    "image/color"
+    "path/filepath"
+    "fmt"
+    "strings"
+    "math"
+    consts "../consts"
 )
 
 func Check(err error) {
@@ -39,7 +46,6 @@ func DecodeJpeg(path string) image.Image {
   img, format, err := image.Decode(f)
   if format != "jpeg" { panic("Only jpeg images are supported") }
   Check(err)
-  
   return img
 }
 
@@ -71,3 +77,11 @@ func ToBlackAndWhite(originalImg image.Image, newImg *image.RGBA, size image.Poi
   }
 }
 
+func PrintBlock(b *consts.Block) {
+  for i := 0; i < 8; i++ {
+    for j := 0; j < 8; j++ {
+      fmt.Printf("%d\t", b[i + 8 * j])
+    }
+    fmt.Printf("\n")
+  }
+}

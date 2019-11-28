@@ -4,7 +4,8 @@ import (
   "image"
   "image/color"
   "math"
-  "fmt"
+  //"fmt"
+  consts "../consts"
 )
 
 // TODO: Structure this so it holds blocks
@@ -15,17 +16,16 @@ type RLETuple struct{
 
 type RLEStruct []RLETuple
 
-func RLE(channel *image.RGBA, size image.Point) /*RLEStruct*/ {
-  //var quarterSize int = int(float64(size.X)*float64(size.Y)/4.0)
+func RLE(b *consts.Block) RLEStruct {
   rle := make(RLEStruct, 0)
   var prev uint8 = 255
 
-  for line := 1; line <= (size.X + size.Y - 1); line++ {
-    startCol := math.Max(0.0, float64(line - size.X))
-    count := math.Min(float64(line), math.Min((float64(size.Y) - startCol), float64(size.Y)))
+  for line := 1; line <= 15; line++ {
+    startCol := math.Max(0.0, float64(line - 8))
+    count := math.Min(float64(line), math.Min((8.0 - startCol), 8.0))
 
     for i := 0; i < int(count); i++ {
-      pixel := channel.At(int(math.Min(float64(size.X), float64(line))) - i - 1, int(startCol) + i).(color.RGBA).R
+      pixel := b[(int(math.Min(8.0, float64(line))) - i - 1 + 8 * int(startCol) + i)]
 
       if prev != pixel {
         var newTuple RLETuple = RLETuple{pixel, 1}
@@ -37,7 +37,5 @@ func RLE(channel *image.RGBA, size image.Point) /*RLEStruct*/ {
     }
   }
 
-  fmt.Printf("\n")
-  fmt.Printf("Reduction: %f \n", 1.0 - float64(len(rle))/float64(size.X*size.Y))
-  //return rle
+  return rle
 }

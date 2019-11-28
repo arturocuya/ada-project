@@ -1,6 +1,10 @@
 // Ancient code extracted from https://golang.org/src/image/jpeg/fdct.go
 package fdct
 
+import (
+  consts "../../consts"
+)
+
 const (
 	fix_0_298631336 = 2446
 
@@ -38,10 +42,7 @@ const (
 
 // level shift.
 
-const blockSize = 64 // A DCT block is 8x8.
-type Block [blockSize]int32
-
-func Fdct(b *Block) {
+func Fdct(b *consts.Block) {
 
 	// Pass 1: process rows.
 

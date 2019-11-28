@@ -7,6 +7,7 @@ import (
   //"fmt"
   //"math"
   fdct "./fdct"
+  consts "../consts"
 )
 
 func shiftBlock(channel *image.RGBA, size image.Point) {
@@ -26,7 +27,7 @@ func DCT(channel *image.RGBA, size image.Point) {
 
   for xBlock := 0; xBlock < numXBlocks; xBlock++{
     for yBlock := 0; yBlock < numYBlocks; yBlock++{
-      var b fdct.Block
+      var b consts.Block
       for x := 0; x < 8; x++ {
         for y := 0; y < 8; y++{
           b[x+8*y] = int32(channel.At(x + 8*xBlock, y + 8*yBlock).(color.RGBA).R)

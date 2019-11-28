@@ -57,6 +57,6 @@ func main() {
     fmt.Printf("\n")
   }*/
 
-  rle.RLE(channelsImg[0], channelsImg[0].Bounds().Size())
+  rlenc := rle.RLE(channelsImg[0], channelsImg[0].Bounds().Size())
 
 }

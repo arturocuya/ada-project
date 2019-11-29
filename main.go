@@ -4,9 +4,9 @@ import (
     "os"
     "image"
     "log"
-    //"fmt"
+    "fmt"
     ut "./src/utils"
-    cmp "./src/compress"
+    // cmp "./src/compress"
     cspace "./src/colorspace"
 )
 
@@ -27,19 +27,26 @@ func main() {
   }
 
   imgSubsample := image.NewRGBA(rect)
+  imgMergedChannels := image.NewRGBA(rect)
 
   // Convert to YCbCr
   cspace.ToYCbCr(img, imgYcbcr)
-  //ut.EncodeJpeg(imgYcbcr, ut.NewImgPath(imgPath, "ycbcr"))
+  ut.EncodeJpeg(imgYcbcr, ut.NewImgPath(imgPath, "ycbcr"))
 
   // Chroma Subsample
   cspace.ChromaSubsampling(imgYcbcr, imgSubsample)
   //ut.EncodeJpeg(imgSubsample, ut.NewImgPath(imgPath, "subsample"))
 
   // Split YCbCr channels
-  cspace.GetChannelsYCbCr(imgYcbcr, channelsImg)
+  cspace.SplitChannelsYCbCr(imgYcbcr, channelsImg)
+  cspace.MergeChannelsYCbCr(channelsImg, imgMergedChannels)
 
-  compressed := cmp.Compress(channelsImg[0], channelsImg[0].Bounds().Size())
-  decompressed := cmp.Decompress(compressed)
-  ut.EncodeJpeg(decompressed, ut.NewImgPath(imgPath, "decomp"))
+  for i:=0; i<3; i++ {
+    ut.EncodeJpeg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("ycbcr-%d", i+1)))
+  }
+  ut.EncodeJpeg(imgMergedChannels, ut.NewImgPath(imgPath, "merged-channels"))
+
+  // compressed := cmp.Compress(channelsImg[0], channelsImg[0].Bounds().Size())
+  // decompressed := cmp.Decompress(compressed)
+  // ut.EncodeJpeg(decompressed, ut.NewImgPath(imgPath, "decomp"))
 }

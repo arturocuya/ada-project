@@ -6,8 +6,9 @@ import (
     "log"
     "fmt"
     ut "./src/utils"
-    // cmp "./src/compress"
+    cmp "./src/compress"
     cspace "./src/colorspace"
+    huffman "./src/compress/huffman"
 )
 
 func main() {
@@ -29,28 +30,40 @@ func main() {
   imgSubsample := image.NewRGBA(rect)
   imgMergedChannels := image.NewRGBA(rect)
   imgFromYcbcr := image.NewRGBA(rect)
+  var compressedChannels [3]huffman.HfEncodedBlocks
+  var imgDecompressedChannels [3]*image.RGBA
 
   // Convert to YCbCr
   cspace.ToYCbCr(img, imgYcbcr)
-  ut.EncodeJpeg(imgYcbcr, ut.NewImgPath(imgPath, "ycbcr"))
+  ut.EncodeJpeg(imgYcbcr, ut.NewImgPath(imgPath, "1-ycbcr"))
 
   // Chroma Subsample
   cspace.ChromaSubsampling(imgYcbcr, imgSubsample)
-  ut.EncodeJpeg(imgSubsample, ut.NewImgPath(imgPath, "subsample"))
+  ut.EncodeJpeg(imgSubsample, ut.NewImgPath(imgPath, "2-subsample"))
 
   // Split YCbCr channels
   cspace.SplitChannelsYCbCr(imgYcbcr, channelsImg)
-  cspace.MergeChannelsYCbCr(channelsImg, imgMergedChannels)
-
+  
   for i:=0; i<3; i++ {
-    ut.EncodeJpeg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("ycbcr-%d", i+1)))
+    ut.EncodeJpeg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("3-ycbcr-%d", i+1)))
   }
-  ut.EncodeJpeg(imgMergedChannels, ut.NewImgPath(imgPath, "merged-channels"))
 
-	cspace.ToRGB(imgYcbcr, imgFromYcbcr)
-  ut.EncodeJpeg(imgFromYcbcr, ut.NewImgPath(imgPath, "fromycbcr"))
+  // Compress each channel
+  for i:=0; i<3; i++ {
+    compressedChannels[i] = cmp.Compress(channelsImg[i], channelsImg[i].Bounds().Size())
+  }
 
-  // compressed := cmp.Compress(channelsImg[0], channelsImg[0].Bounds().Size())
-  // decompressed := cmp.Decompress(compressed)
-  // ut.EncodeJpeg(decompressed, ut.NewImgPath(imgPath, "decomp"))
+  // Decompress each channel
+  for i:=0; i<3; i++ {
+    imgDecompressedChannels[i] = cmp.Decompress(compressedChannels[i])
+    ut.EncodeJpeg(imgDecompressedChannels[i], ut.NewImgPath(imgPath, fmt.Sprintf("4-decompressed-%d", i+1)))
+  }
+
+  // Merge channels
+	cspace.MergeChannelsYCbCr(imgDecompressedChannels, imgMergedChannels)
+  ut.EncodeJpeg(imgMergedChannels, ut.NewImgPath(imgPath, "5-merged-channels"))
+
+  // Convert to RGB
+	cspace.ToRGB(imgMergedChannels, imgFromYcbcr)
+  ut.EncodeJpeg(imgFromYcbcr, ut.NewImgPath(imgPath, "6-fromycbcr"))
 }

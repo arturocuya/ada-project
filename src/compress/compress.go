@@ -3,11 +3,11 @@ package compress
 import (
   "image"
   "image/color"
-  "fmt"
   //ut "../utils"
   dct "./dct"
   rle "./rle"
   consts "../consts"
+  huffman "./huffman"
 )
 
 var smooth float64 = 3
@@ -44,13 +44,13 @@ func InvQuantize(b *consts.Block) {
   }
 }
 
-func Compress(channel *image.RGBA, size image.Point) consts.RLEBlocks{
+func Compress(channel *image.RGBA, size image.Point) huffman.HfEncodedBlocks{
   numXBlocks := size.X / 8
   numYBlocks := size.Y / 8
 
-  var rleBlocks consts.RLEBlocks
-  rleBlocks.X = uint16(numXBlocks)
-  rleBlocks.Y = uint16(numYBlocks)
+  var encodedBlocks huffman.HfEncodedBlocks
+  encodedBlocks.X = uint16(numXBlocks)
+  encodedBlocks.Y = uint16(numYBlocks)
 
   for xBlock := 0; xBlock < numXBlocks; xBlock++{
     for yBlock := 0; yBlock < numYBlocks; yBlock++{
@@ -67,7 +67,21 @@ func Compress(channel *image.RGBA, size image.Point) consts.RLEBlocks{
       dct.Fdct(&b)
       Quantize(&b)
 
-      rleBlocks.Blocks = append(rleBlocks.Blocks, rle.RLE(&b))
+      var hf *huffman.HuffmanTree
+      var encodedData []consts.HuffmanEdge
+      // Encode with Huffman
+      rleList := rle.RLE(&b)
+      if (len(rleList)<2){
+      	hf = nil
+      	encodedData = []consts.HuffmanEdge{}
+      } else {
+      	frequencies := huffman.GetFrequencies(rleList)
+	      hf = huffman.NewHuffmanTree(frequencies)
+	      encodedData = hf.EncodeData(rleList)
+      }
+
+      encodedBlocks.Blocks = append(encodedBlocks.Blocks, encodedData)
+      encodedBlocks.HfTrees = append(encodedBlocks.HfTrees, hf)
 
       // Reconstruct image from block
       for x := 0; x < 8; x++ {
@@ -77,22 +91,28 @@ func Compress(channel *image.RGBA, size image.Point) consts.RLEBlocks{
       }
     }
   }
-
-  return rleBlocks
+  return encodedBlocks
 }
 
 // Do not touch for other reason than complete destruction
-func Decompress(rleBlocks consts.RLEBlocks) *image.RGBA{
-  rect := image.Rect(0, 0, int(rleBlocks.X)*8, int(rleBlocks.Y)*8)
+func Decompress(encodedBlocks huffman.HfEncodedBlocks) *image.RGBA{
+  rect := image.Rect(0, 0, int(encodedBlocks.X)*8, int(encodedBlocks.Y)*8)
   finalImg := image.NewRGBA(rect)
 
-  fmt.Println(rleBlocks.X)
-  fmt.Println(rleBlocks.Y)
+  for xBlock := 0; xBlock < int(encodedBlocks.X); xBlock++{
+    for yBlock := 0; yBlock < int(encodedBlocks.Y); yBlock++{
+      encodedBlock := encodedBlocks.Blocks[xBlock*int(encodedBlocks.Y) + yBlock]
+      hf := encodedBlocks.HfTrees[xBlock*int(encodedBlocks.Y) + yBlock]
 
-  for xBlock := 0; xBlock < int(rleBlocks.X); xBlock++{
-    for yBlock := 0; yBlock < int(rleBlocks.Y); yBlock++{
-      rleBlock := rleBlocks.Blocks[xBlock*int(rleBlocks.Y) + yBlock]
-      b := rle.InvRLE(rleBlock)
+      var rleList []consts.RLETuple
+      // Decode with huffman
+      if hf == nil{
+      	rleList = []consts.RLETuple{ consts.RLETuple{0,0,0} }
+      } else{
+      	rleList = hf.DecodeData(encodedBlock)
+      }
+      
+      b := rle.InvRLE(rleList)
 
       InvQuantize(&b)
       dct.Idct(&b)

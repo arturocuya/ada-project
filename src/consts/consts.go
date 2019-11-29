@@ -20,12 +20,6 @@ type RLETuple struct{
 
 type RLEList []RLETuple
 
-type RLEBlocks struct{
-  Blocks []RLEList
-  X uint16
-  Y uint16
-}
-
 // Psychovisually-tuned quantization table
 // Extracted from https://es.coursera.org/lecture/dsp/7-6-the-jpeg-compression-algorithm-Q6hgv @ 2:45
 

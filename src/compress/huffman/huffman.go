@@ -2,7 +2,7 @@ package huffman
 
 import (
   // "fmt"
-	"../consts"
+	"../../consts"
 	// "../rle"
 	"sort"
 )
@@ -17,7 +17,13 @@ type RLETuple struct{
 type RLEList []RLETuple
 */
 
-type NodeData rune // rle.RLETuple
+type HfEncodedBlocks struct{
+  Blocks [][]consts.HuffmanEdge
+  HfTrees []*HuffmanTree
+  X uint16
+  Y uint16
+}
+
 type node struct {
 	/* A new node can be created in three ways:
 	   - Non-leaf node: Passing children to the newNonLeafNode constructor. Frequecy
@@ -29,11 +35,11 @@ type node struct {
 	*/
 	left      *node
 	right     *node
-	data      NodeData
+	data      consts.RLETuple
 	frequency int
 }
 
-func newLeafNode(data NodeData, freq int) *node {
+func newLeafNode(data consts.RLETuple, freq int) *node {
 	n := new(node)
 	n.data = data
 	n.frequency = freq
@@ -77,11 +83,11 @@ func (n *node) print() {
 
 type HuffmanTree struct {
 	root           *node
-	addressTable map[NodeData][]consts.HuffmanEdge
+	addressTable map[consts.RLETuple][]consts.HuffmanEdge
 }
 
 /* For debugging
-func (hf *HuffmanTree) GetFreqTable() (map[NodeData]int, []NodeData){
+func (hf *HuffmanTree) GetFreqTable() (map[consts.RLETuple]int, []consts.RLETuple){
    return hf.frequencyTable, sortedKeysByVal(hf.frequencyTable)
 }
 */
@@ -93,7 +99,7 @@ func (hf *HuffmanTree) Print() (){
 */
 
 
-func NewHuffmanTree(dataFrequences map[NodeData]int) *HuffmanTree {
+func NewHuffmanTree(dataFrequences map[consts.RLETuple]int) *HuffmanTree {
 	/*  The constructor receives a map with the value to be stored
 	    in tree as a key and the frequency of this value.
 	    The frequencies are sorted in ascendent order and the most frequent
@@ -103,7 +109,7 @@ func NewHuffmanTree(dataFrequences map[NodeData]int) *HuffmanTree {
 	*/
 
 	if len(dataFrequences) < 2 {
-		panic("HuffmanTree needs a list of one or more elements")
+		panic("HuffmanTree needs a list of two or more elements")
 	}
 
 	hf := new(HuffmanTree)
@@ -127,7 +133,7 @@ func NewHuffmanTree(dataFrequences map[NodeData]int) *HuffmanTree {
 		hf.root = newNonLeafNode(left, right) // create new root
 	}
 
-  hf.addressTable = make(map[NodeData][]consts.HuffmanEdge)
+  hf.addressTable = make(map[consts.RLETuple][]consts.HuffmanEdge)
   hf.setAllAddresses(hf.root, []consts.HuffmanEdge{})
 
 	return hf
@@ -151,7 +157,7 @@ func (hf *HuffmanTree) setAllAddresses(curNode *node, curAddress []consts.Huffma
   }
 }
 
-func (hf *HuffmanTree) EncodeData(dataList []NodeData) []consts.HuffmanEdge {
+func (hf *HuffmanTree) EncodeData(dataList []consts.RLETuple) []consts.HuffmanEdge {
 	/* Encode the data with the addresses of the address table
 	*/
 
@@ -166,7 +172,7 @@ func (hf *HuffmanTree) EncodeData(dataList []NodeData) []consts.HuffmanEdge {
 	return encodedList
 }
 
-func (hf *HuffmanTree) DecodeData(bitArray []consts.HuffmanEdge) []NodeData {
+func (hf *HuffmanTree) DecodeData(bitArray []consts.HuffmanEdge) []consts.RLETuple {
 	/* Huffman iterates through Bit Array, which represents a 'map'
 	   with the directions (bit) to Huffman values (leafs). After
 	   iterating, a list of the values found is returned. If at the
@@ -183,7 +189,7 @@ func (hf *HuffmanTree) DecodeData(bitArray []consts.HuffmanEdge) []NodeData {
 	   4. Continue the search
 	*/
 
-	valuesFound := make([]NodeData, 0)
+	valuesFound := make([]consts.RLETuple, 0)
 	curNode := hf.root
 	for _, edge := range bitArray {
 		if edge == consts.LeftEdge {
@@ -203,8 +209,8 @@ func (hf *HuffmanTree) DecodeData(bitArray []consts.HuffmanEdge) []NodeData {
 	return valuesFound
 }
 
-func sortedKeysByVal(m map[NodeData]int) []NodeData {
-	sortedKeys := make([]NodeData, len(m))
+func sortedKeysByVal(m map[consts.RLETuple]int) []consts.RLETuple {
+	sortedKeys := make([]consts.RLETuple, len(m))
 	i := 0
 	for key, _ := range m {
 		sortedKeys[i] = key
@@ -217,8 +223,8 @@ func sortedKeysByVal(m map[NodeData]int) []NodeData {
 	return sortedKeys
 }
 
-func GetFrequencies(rleList []NodeData) map[NodeData]int {
-	freq := make(map[NodeData]int)
+func GetFrequencies(rleList []consts.RLETuple) map[consts.RLETuple]int {
+	freq := make(map[consts.RLETuple]int)
 
 	for _, data := range rleList {
 		if _, val := freq[data]; !val {

@@ -10,6 +10,8 @@ import (
   consts "../consts"
 )
 
+var smooth float64 = 3
+
 func ShiftBlock(b *consts.Block) {
   for x := 0; x < 8; x++{
     for y := 0; y < 8; y++{
@@ -29,7 +31,7 @@ func InvShiftBlock(b *consts.Block) {
 func Quantize(b *consts.Block) {
   for i := 0; i < 8; i++ {
     for j := 0; j < 8; j++ {
-      b[8*i + j]= int32(float64(b[8*i + j]) / (consts.QuantizationTable[i][j]))
+      b[8*i + j]= int32(float64(b[8*i + j]) / (consts.QuantizationTable[i][j]/smooth))
     }
   }
 }
@@ -37,7 +39,7 @@ func Quantize(b *consts.Block) {
 func InvQuantize(b *consts.Block) {
   for i := 0; i < 8; i++ {
     for j := 0; j < 8; j++ {
-      b[8*i + j ]= int32(float64(b[8*i + j]) * (consts.QuantizationTable[i][j]))
+      b[8*i + j ]= int32(float64(b[8*i + j]) * (consts.QuantizationTable[i][j]/smooth))
     }
   }
 }

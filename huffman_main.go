@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	huffman "./huffman"
+	huffman "./src/huffman"
 	// consts "./consts"
 )
 

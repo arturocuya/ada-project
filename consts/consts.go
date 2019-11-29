@@ -28,8 +28,8 @@ var QuantizationTable = [8][8] float64 {
   {72, 92, 95, 98, 112, 100, 103, 99},
 }
 
-type HuffmanEdge int
+type HuffmanEdge bool
 const(
-	LeftEdge HuffmanEdge = 0 // 0 bit
-	RightEdge HuffmanEdge = 1 // 1 bit
+	LeftEdge HuffmanEdge = false // 0 bit
+	RightEdge HuffmanEdge = true // 1 bit
 )

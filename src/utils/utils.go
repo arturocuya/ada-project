@@ -44,7 +44,10 @@ func DecodeImg(path string) image.Image {
   defer f.Close()
 
   // img is readonly
-  img, _ := tiff.Decode(f)
+  if ext := filepath.Ext(path); ext!="tif"{
+  	panic("Only tiff images are supported")
+  }
+  img, err := tiff.Decode(f)
   Check(err)
   return img
 }

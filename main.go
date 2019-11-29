@@ -28,6 +28,7 @@ func main() {
 
   imgSubsample := image.NewRGBA(rect)
   imgMergedChannels := image.NewRGBA(rect)
+  imgFromYcbcr := image.NewRGBA(rect)
 
   // Convert to YCbCr
   cspace.ToYCbCr(img, imgYcbcr)
@@ -45,6 +46,9 @@ func main() {
     ut.EncodeJpeg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("ycbcr-%d", i+1)))
   }
   ut.EncodeJpeg(imgMergedChannels, ut.NewImgPath(imgPath, "merged-channels"))
+
+	cspace.ToRGB(imgMergedChannels, imgFromYcbcr)
+  ut.EncodeJpeg(imgFromYcbcr, ut.NewImgPath(imgPath, "fromycbcr"))
 
   // compressed := cmp.Compress(channelsImg[0], channelsImg[0].Bounds().Size())
   // decompressed := cmp.Decompress(compressed)

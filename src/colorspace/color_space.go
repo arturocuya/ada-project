@@ -31,6 +31,31 @@ func ToYCbCr(originalImg image.Image, newImg *image.RGBA) {
   }
 }
 
+func ToRGB(originalImg image.Image, newImg *image.RGBA) {
+  size := originalImg.Bounds().Size()
+  ycbcrImgColor := getColor(originalImg)
+
+  for x := 0; x < size.X; x++ {
+    for y := 0; y < size.Y; y++ {
+      oldColor := ycbcrImgColor(x, y)
+
+      componentR := uint8(oldColor[consts.Y] + 1.402*(oldColor[consts.Cr]-128))
+      componentG := uint8(oldColor[consts.Y] - 0.34414*(oldColor[consts.Cb]-128) - 0.71414*(oldColor[consts.Cr]-128))
+      componentB := uint8(oldColor[consts.Y] + 1.772*(oldColor[consts.Cb]-128))
+
+      if ((0>componentR && componentR>255) || (0>componentG && componentG>255) || (0>componentB && componentB>255)){
+        panic("RGB can't be outside range [0, 255]")
+      }
+
+      newColor := color.RGBA{
+        R: componentR, G: componentG, B: componentB, A: uint8(oldColor[3]),
+      }
+
+      newImg.Set(x, y, newColor)
+    }
+  }
+}
+
 func SplitChannelsYCbCr(originalImg image.Image, dividedImgs [3]*image.RGBA) {
   size := originalImg.Bounds().Size()
 

@@ -3,7 +3,7 @@ package compress
 import (
   "image"
   "image/color"
-  "fmt"
+  // "fmt"
   //ut "../utils"
   dct "./dct"
   rle "./rle"
@@ -86,8 +86,8 @@ func Decompress(rleBlocks consts.RLEBlocks) *image.RGBA{
   rect := image.Rect(0, 0, int(rleBlocks.X)*8, int(rleBlocks.Y)*8)
   finalImg := image.NewRGBA(rect)
 
-  fmt.Println(rleBlocks.X)
-  fmt.Println(rleBlocks.Y)
+  // fmt.Println(rleBlocks.X)
+  // fmt.Println(rleBlocks.Y)
 
   for xBlock := 0; xBlock < int(rleBlocks.X); xBlock++{
     for yBlock := 0; yBlock < int(rleBlocks.Y); yBlock++{
@@ -101,7 +101,7 @@ func Decompress(rleBlocks consts.RLEBlocks) *image.RGBA{
       // Reconstruct image from block
       for x := 0; x < 8; x++ {
         for y := 0; y < 8; y++{
-          fmt.Printf("Building pixel (%d, %d)\n", x + 8*xBlock, y + 8*yBlock)
+          // fmt.Printf("Building pixel (%d, %d)\n", x + 8*xBlock, y + 8*yBlock)
           finalImg.Set(x + 8*xBlock, y + 8*yBlock, color.Gray{uint8(b[8*x+y])})
         }
       }

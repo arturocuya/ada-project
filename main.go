@@ -24,7 +24,7 @@ func main() {
   smooth, err := strconv.ParseFloat(os.Args[2], 64)
   ut.Check(err)
 
-  img := ut.DecodeJpeg(imgPath)
+  img := ut.DecodeImg(imgPath)
 
   // Create empty images
   size := img.Bounds().Size()
@@ -44,17 +44,17 @@ func main() {
 
   // Convert to YCbCr
   cspace.ToYCbCr(img, imgYcbcr)
-  ut.EncodeJpeg(imgYcbcr, ut.NewImgPath(imgPath, "1-ycbcr"))
+  ut.EncodeImg(imgYcbcr, ut.NewImgPath(imgPath, "1-ycbcr"))
 
   // Chroma Subsample
   cspace.ChromaSubsampling(imgYcbcr, imgSubsample)
-  ut.EncodeJpeg(imgSubsample, ut.NewImgPath(imgPath, "2-subsample"))
+  ut.EncodeImg(imgSubsample, ut.NewImgPath(imgPath, "2-subsample"))
 
   // Split YCbCr channels
   cspace.SplitChannelsYCbCr(imgYcbcr, channelsImg)
   
   for i:=0; i<3; i++ {
-    ut.EncodeJpeg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("3-ycbcr-%d", i+1)))
+    ut.EncodeImg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("3-ycbcr-%d", i+1)))
   }
 
   // Compress each channel
@@ -65,14 +65,14 @@ func main() {
   // Decompress each channel
   for i:=0; i<3; i++ {
     imgDecompressedChannels[i] = cmp.Decompress(compressedChannels[i])
-    ut.EncodeJpeg(imgDecompressedChannels[i], ut.NewImgPath(imgPath, fmt.Sprintf("4-decompressed-%d", i+1)))
+    ut.EncodeImg(imgDecompressedChannels[i], ut.NewImgPath(imgPath, fmt.Sprintf("4-decompressed-%d", i+1)))
   }
 
   // Merge channels
 	cspace.MergeChannelsYCbCr(imgDecompressedChannels, imgMergedChannels)
-  ut.EncodeJpeg(imgMergedChannels, ut.NewImgPath(imgPath, "5-merged-channels"))
+  ut.EncodeImg(imgMergedChannels, ut.NewImgPath(imgPath, "5-merged-channels"))
 
   // Convert to RGB
 	cspace.ToRGB(imgMergedChannels, imgFromYcbcr)
-  ut.EncodeJpeg(imgFromYcbcr, ut.NewImgPath(imgPath, "6-fromycbcr"))
+  ut.EncodeImg(imgFromYcbcr, ut.NewImgPath(imgPath, "6-fromycbcr"))
 }

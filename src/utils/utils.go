@@ -3,7 +3,8 @@ package utils
 import (
     "os"
     "image"
-    "image/jpeg"
+    //"image/jpeg"
+    "golang.org/x/image/tiff"
     "image/color"
     "path/filepath"
     "fmt"
@@ -37,23 +38,25 @@ func NewImgPath(originalPath string, suffix string) string {
 }
 
 
-func DecodeJpeg(path string) image.Image {
+func DecodeImg(path string) image.Image {
   f, err := os.Open(path)
   Check(err)
   defer f.Close()
 
   // img is readonly
-  img, format, err := image.Decode(f)
-  if format != "jpeg" { panic("Only jpeg images are supported") }
+  if ext := filepath.Ext(path); ext!="tif"{
+  	panic("Only tiff images are supported")
+  }
+  img, err := tiff.Decode(f)
   Check(err)
   return img
 }
 
-func EncodeJpeg(img image.Image, path string) {
+func EncodeImg(img image.Image, path string) {
   fg, err := os.Create(path)
   defer fg.Close()
   Check(err)
-  err = jpeg.Encode(fg, img, nil)
+  err = tiff.Encode(fg, img, nil)
   Check(err)
 }
 

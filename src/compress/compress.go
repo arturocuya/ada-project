@@ -10,7 +10,7 @@ import (
   huffman "./huffman"
 )
 
-var smooth float64 = 3
+var smooth float64 = 4
 
 func ShiftBlock(b *consts.Block) {
   for x := 0; x < 8; x++{
@@ -28,7 +28,7 @@ func InvShiftBlock(b *consts.Block) {
   }
 }
 
-func Quantize(b *consts.Block) {
+func Quantize(b *consts.Block, smooth float64) {
   for i := 0; i < 8; i++ {
     for j := 0; j < 8; j++ {
       b[8*i + j]= int32(float64(b[8*i + j]) / (consts.QuantizationTable[i][j]/smooth))
@@ -36,7 +36,7 @@ func Quantize(b *consts.Block) {
   }
 }
 
-func InvQuantize(b *consts.Block) {
+func InvQuantize(b *consts.Block, smooth float64) {
   for i := 0; i < 8; i++ {
     for j := 0; j < 8; j++ {
       b[8*i + j ]= int32(float64(b[8*i + j]) * (consts.QuantizationTable[i][j]/smooth))
@@ -44,13 +44,14 @@ func InvQuantize(b *consts.Block) {
   }
 }
 
-func Compress(channel *image.RGBA, size image.Point) huffman.HfEncodedBlocks{
+func Compress(channel *image.RGBA, size image.Point, smooth float64) huffman.HfEncodedBlocks{
   numXBlocks := size.X / 8
   numYBlocks := size.Y / 8
 
   var encodedBlocks huffman.HfEncodedBlocks
   encodedBlocks.X = uint16(numXBlocks)
   encodedBlocks.Y = uint16(numYBlocks)
+  encodedBlocks.Smooth = smooth
 
   for xBlock := 0; xBlock < numXBlocks; xBlock++{
     for yBlock := 0; yBlock < numYBlocks; yBlock++{
@@ -65,7 +66,7 @@ func Compress(channel *image.RGBA, size image.Point) huffman.HfEncodedBlocks{
 
       ShiftBlock(&b)
       dct.Fdct(&b)
-      Quantize(&b)
+      Quantize(&b, smooth)
 
       var hf *huffman.HuffmanTree
       var encodedData []consts.HuffmanEdge
@@ -114,7 +115,7 @@ func Decompress(encodedBlocks huffman.HfEncodedBlocks) *image.RGBA{
       
       b := rle.InvRLE(rleList)
 
-      InvQuantize(&b)
+      InvQuantize(&b, encodedBlocks.Smooth)
       dct.Idct(&b)
       InvShiftBlock(&b)
 

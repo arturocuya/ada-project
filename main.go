@@ -5,6 +5,7 @@ import (
     "image"
     "log"
     "fmt"
+    "strconv"
     ut "./src/utils"
     cmp "./src/compress"
     cspace "./src/colorspace"
@@ -13,8 +14,16 @@ import (
 
 func main() {
   // The image path must be passed as an argument
-  if len(os.Args) < 2 { log.Fatalln("Image path is required") }
+  if len(os.Args) == 1 {
+		log.Fatalln("Image path and smooth value is required")
+  } else if len(os.Args) == 2 {
+  	log.Fatalln("Smooth value is required")
+  }
+
   imgPath := os.Args[1]
+  smooth, err := strconv.ParseFloat(os.Args[2], 64)
+  ut.Check(err)
+
   img := ut.DecodeJpeg(imgPath)
 
   // Create empty images
@@ -50,7 +59,7 @@ func main() {
 
   // Compress each channel
   for i:=0; i<3; i++ {
-    compressedChannels[i] = cmp.Compress(channelsImg[i], channelsImg[i].Bounds().Size())
+    compressedChannels[i] = cmp.Compress(channelsImg[i], channelsImg[i].Bounds().Size(), smooth)
   }
 
   // Decompress each channel

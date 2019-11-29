@@ -22,6 +22,7 @@ type HfEncodedBlocks struct{
   HfTrees []*HuffmanTree
   X uint16
   Y uint16
+  Smooth float64
 }
 
 type node struct {

@@ -101,6 +101,7 @@ func Decompress(rleBlocks consts.RLEBlocks) *image.RGBA{
       // Reconstruct image from block
       for x := 0; x < 8; x++ {
         for y := 0; y < 8; y++{
+          fmt.Printf("Building pixel (%d, %d)\n", x + 8*xBlock, y + 8*yBlock)
           finalImg.Set(x + 8*xBlock, y + 8*yBlock, color.Gray{uint8(b[8*x+y])})
         }
       }

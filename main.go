@@ -4,9 +4,9 @@ import (
     "os"
     "image"
     "log"
-    "fmt"
+    //"fmt"
     ut "./src/utils"
-    // cmp "./src/compress"
+     cmp "./src/compress"
     cspace "./src/colorspace"
 )
 
@@ -14,7 +14,7 @@ func main() {
   // The image path must be passed as an argument
   if len(os.Args) < 2 { log.Fatalln("Image path is required") }
   imgPath := os.Args[1]
-  img := ut.DecodeJpeg(imgPath)
+  img := ut.DecodeImg(imgPath)
 
   // Create empty images
   size := img.Bounds().Size()
@@ -27,26 +27,26 @@ func main() {
   }
 
   imgSubsample := image.NewRGBA(rect)
-  imgMergedChannels := image.NewRGBA(rect)
+  //imgMergedChannels := image.NewRGBA(rect)
 
   // Convert to YCbCr
   cspace.ToYCbCr(img, imgYcbcr)
-  ut.EncodeJpeg(imgYcbcr, ut.NewImgPath(imgPath, "ycbcr"))
+  ut.EncodeImg(imgYcbcr, ut.NewImgPath(imgPath, "ycbcr"))
 
   // Chroma Subsample
   cspace.ChromaSubsampling(imgYcbcr, imgSubsample)
-  //ut.EncodeJpeg(imgSubsample, ut.NewImgPath(imgPath, "subsample"))
+  //ut.EncodeImg(imgSubsample, ut.NewImgPath(imgPath, "subsample"))
 
   // Split YCbCr channels
   cspace.SplitChannelsYCbCr(imgYcbcr, channelsImg)
-  cspace.MergeChannelsYCbCr(channelsImg, imgMergedChannels)
+  //cspace.MergeChannelsYCbCr(channelsImg, imgMergedChannels)
 
-  for i:=0; i<3; i++ {
-    ut.EncodeJpeg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("ycbcr-%d", i+1)))
-  }
-  ut.EncodeJpeg(imgMergedChannels, ut.NewImgPath(imgPath, "merged-channels"))
+  //for i:=0; i<3; i++ {
+  //  ut.EncodeImg(channelsImg[i], ut.NewImgPath(imgPath, fmt.Sprintf("ycbcr-%d", i+1)))
+  //}
+  //ut.EncodeImg(imgMergedChannels, ut.NewImgPath(imgPath, "merged-channels"))
 
-  // compressed := cmp.Compress(channelsImg[0], channelsImg[0].Bounds().Size())
-  // decompressed := cmp.Decompress(compressed)
-  // ut.EncodeJpeg(decompressed, ut.NewImgPath(imgPath, "decomp"))
+   compressed := cmp.Compress(channelsImg[0], channelsImg[0].Bounds().Size())
+   decompressed := cmp.Decompress(compressed)
+   ut.EncodeImg(decompressed, ut.NewImgPath(imgPath, "decomp"))
 }

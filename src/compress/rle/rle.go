@@ -79,8 +79,10 @@ func InvRLE(rle consts.RLEList) consts.Block {
       if (rle[rleIndex].Val != 0) {
         if (zerosRight == 0) {
           bValue = rle[rleIndex].Val
-          rleIndex++
-          zerosRight = rle[rleIndex].Zb
+          if rleIndex+1 < len(rle) {
+            rleIndex++
+            zerosRight = rle[rleIndex].Zb
+          }
         } else {
           bValue = 0
           zerosRight--

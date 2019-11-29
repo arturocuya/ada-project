@@ -8,7 +8,7 @@ const (
   Cr  YCbCr = 2
 )
 
-const blockSize = 64 // A DCT block is 8x8.
+const blockSize = 64 // A block is 8x8.
 type Block [blockSize]int32
 
 type RLETuple struct{
@@ -20,7 +20,11 @@ type RLETuple struct{
 
 type RLEList []RLETuple
 
-type BlocksRLE []RLEList
+type RLEBlocks struct{
+  Blocks []RLEList
+  X uint16
+  Y uint16
+}
 
 // Psychovisually-tuned quantization table
 // Extracted from https://es.coursera.org/lecture/dsp/7-6-the-jpeg-compression-algorithm-Q6hgv @ 2:45

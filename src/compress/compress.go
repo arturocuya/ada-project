@@ -1,13 +1,12 @@
 package compress
 
 import (
-  /*"image"
+  "image"
   "image/color"
   "fmt"
-  ut "../utils"
-  fdct "./fdct"
-  idct "./idct"
-  rle "./rle"*/
+  //ut "../utils"
+  dct "./dct"
+  rle "./rle"
   consts "../consts"
 )
 
@@ -43,14 +42,13 @@ func InvQuantize(b *consts.Block) {
   }
 }
 
-/*
-func Compress(channel *image.RGBA, size image.Point) consts.BlocksRLE{
-  fmt.Println("COMPRESSING")
-  fmt.Printf("\n")
+func Compress(channel *image.RGBA, size image.Point) consts.RLEBlocks{
   numXBlocks := size.X / 8
   numYBlocks := size.Y / 8
 
-  rleBlocks := make(consts.BlocksRLE, 0)
+  var rleBlocks consts.RLEBlocks
+  rleBlocks.X = uint16(numXBlocks)
+  rleBlocks.Y = uint16(numYBlocks)
 
   for xBlock := 0; xBlock < numXBlocks; xBlock++{
     for yBlock := 0; yBlock < numYBlocks; yBlock++{
@@ -59,35 +57,20 @@ func Compress(channel *image.RGBA, size image.Point) consts.BlocksRLE{
 
       for x := 0; x < 8; x++ {
         for y := 0; y < 8; y++{
-          b[x+8*y] =  int32(channel.At(x + 8*xBlock, y + 8*yBlock).(color.RGBA).R)
+          b[8*x+y] =  int32(channel.At(x + 8*xBlock, y + 8*yBlock).(color.RGBA).R)
         }
       }
 
-      bx := b
-      shiftBlock(&b)
-      sb := b
-      fdct.Fdct(&b)
-      fdctb := b
-      quantize(&b)
-      qb := b
+      ShiftBlock(&b)
+      dct.Fdct(&b)
+      Quantize(&b)
 
-      if xBlock == 0 && yBlock == xBlock {
-        fmt.Println("Before shifting")
-        ut.PrintBlock(&bx)
-        fmt.Println("After shifting")
-        ut.PrintBlock(&sb)
-        fmt.Println("After fdct")
-        ut.PrintBlock(&fdctb)
-        fmt.Println("After quantizing")
-        ut.PrintBlock(&qb)
-      }
-
-      rleBlocks = append(rleBlocks, rle.RLE(&b))
+      rleBlocks.Blocks = append(rleBlocks.Blocks, rle.RLE(&b))
 
       // Reconstruct image from block
       for x := 0; x < 8; x++ {
         for y := 0; y < 8; y++{
-          channel.Set(x + 8*xBlock, y + 8*yBlock,color.Gray{uint8(b[x+8*y])})
+          channel.Set(x + 8*xBlock, y + 8*yBlock, color.Gray{uint8(b[x+8*y])})
         }
       }
     }
@@ -96,32 +79,30 @@ func Compress(channel *image.RGBA, size image.Point) consts.BlocksRLE{
   return rleBlocks
 }
 
-func Decompress(rleBlocks consts.BlocksRLE) {
-  fmt.Println("DECOMPRESSING")
-  fmt.Printf("\n")
+// Do not touch for other reason than complete destruction
+func Decompress(rleBlocks consts.RLEBlocks) *image.RGBA{
+  rect := image.Rect(0, 0, int(rleBlocks.X)*8, int(rleBlocks.Y)*8)
+  finalImg := image.NewRGBA(rect)
 
-  for i := 0; i < len(rleBlocks); i++ {
-    b := rle.InvRLE(rleBlocks[i])
+  fmt.Println(rleBlocks.X)
+  fmt.Println(rleBlocks.Y)
 
-    ibx := b
+  for xBlock := 0; xBlock < int(rleBlocks.X); xBlock++{
+    for yBlock := 0; yBlock < int(rleBlocks.Y); yBlock++{
+      rleBlock := rleBlocks.Blocks[xBlock*int(rleBlocks.Y) + yBlock]
+      b := rle.InvRLE(rleBlock)
 
-    invQuantize(&b)
-    iqb := b
-    idct.Idct(&b)
-    idctb := b
-    invShiftBlock(&b)
-    isb := b
+      InvQuantize(&b)
+      dct.Idct(&b)
+      InvShiftBlock(&b)
 
-    if i == 0 {
-      fmt.Println("Before")
-      ut.PrintBlock(&ibx)
-      fmt.Println("After inverting quantizing")
-      ut.PrintBlock(&iqb)
-      fmt.Println("After idct")
-      ut.PrintBlock(&idctb)
-      fmt.Println("After inverting shifting")
-      ut.PrintBlock(&isb)
+      // Reconstruct image from block
+      for x := 0; x < 8; x++ {
+        for y := 0; y < 8; y++{
+          finalImg.Set(x + 8*xBlock, y + 8*yBlock, color.Gray{uint8(b[8*x+y])})
+        }
+      }
     }
   }
+  return finalImg
 }
-*/

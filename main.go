@@ -1,15 +1,13 @@
-package main2
+package main
 
 import (
     "os"
     "image"
     "log"
-    "fmt"
+    //"fmt"
     ut "./src/utils"
     cmp "./src/compress"
     cspace "./src/colorspace"
-    //rle "./src/compress/rle"
-    //consts "./src/consts"
 )
 
 func main() {
@@ -42,6 +40,6 @@ func main() {
   cspace.GetChannelsYCbCr(imgYcbcr, channelsImg)
 
   compressed := cmp.Compress(channelsImg[0], channelsImg[0].Bounds().Size())
-  cmp.Decompress(compressed)
-  ut.EncodeJpeg(channelsImg[0], ut.NewImgPath(imgPath, fmt.Sprintf("dct-%d", 0)))
+  decompressed := cmp.Decompress(compressed)
+  ut.EncodeJpeg(decompressed, ut.NewImgPath(imgPath, "decomp"))
 }

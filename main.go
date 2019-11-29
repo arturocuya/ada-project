@@ -36,7 +36,7 @@ func main() {
 
   // Chroma Subsample
   cspace.ChromaSubsampling(imgYcbcr, imgSubsample)
-  //ut.EncodeJpeg(imgSubsample, ut.NewImgPath(imgPath, "subsample"))
+  ut.EncodeJpeg(imgSubsample, ut.NewImgPath(imgPath, "subsample"))
 
   // Split YCbCr channels
   cspace.SplitChannelsYCbCr(imgYcbcr, channelsImg)
@@ -47,7 +47,7 @@ func main() {
   }
   ut.EncodeJpeg(imgMergedChannels, ut.NewImgPath(imgPath, "merged-channels"))
 
-	cspace.ToRGB(imgMergedChannels, imgFromYcbcr)
+	cspace.ToRGB(imgYcbcr, imgFromYcbcr)
   ut.EncodeJpeg(imgFromYcbcr, ut.NewImgPath(imgPath, "fromycbcr"))
 
   // compressed := cmp.Compress(channelsImg[0], channelsImg[0].Bounds().Size())
